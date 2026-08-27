@@ -1,16 +1,18 @@
 const isServerless = !!process.env.VERCEL;
 
-let puppeteer;
-let chromium;
-
-if (isServerless) {
-  puppeteer = require('puppeteer-core');
-  chromium = require('@sparticuz/chromium');
-} else {
-  puppeteer = require('puppeteer');
-}
-
 const scrapeProfile = async (profileUrl, liAt, jsessionId) => {
+  let puppeteer;
+  let chromium;
+
+  if (isServerless) {
+    const puppeteerModule = await import('puppeteer-core');
+    puppeteer = puppeteerModule.default || puppeteerModule;
+    chromium = require('@sparticuz/chromium');
+  } else {
+    const puppeteerModule = await import('puppeteer');
+    puppeteer = puppeteerModule.default || puppeteerModule;
+  }
+
   let browser;
   try {
     let launchOptions = {};
