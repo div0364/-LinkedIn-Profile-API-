@@ -2,10 +2,10 @@
   "name": "tross_project_divyam_sinha",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "local.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "node local.js",
+    "dev": "node local.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
