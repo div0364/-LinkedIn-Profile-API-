@@ -2,7 +2,7 @@ const Profile = require('../models/Profile');
 const { scrapeProfile } = require('../services/scraperService');
 
 const scrapeAndSaveProfile = async (req, res) => {
-  const { url } = req.body;
+  const { url, liAt: customLiAt, jsessionId: customJsessionId } = req.body;
   const force = req.query.force === 'true';
 
   if (!url) {
@@ -21,8 +21,8 @@ const scrapeAndSaveProfile = async (req, res) => {
       }
     }
 
-    const liAt = process.env.LINKEDIN_LI_AT;
-    const jsessionId = process.env.LINKEDIN_JSESSIONID;
+    const liAt = customLiAt || process.env.LINKEDIN_LI_AT;
+    const jsessionId = customJsessionId || process.env.LINKEDIN_JSESSIONID;
 
     const scrapedData = await scrapeProfile(url, liAt, jsessionId);
 
