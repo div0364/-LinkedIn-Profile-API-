@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node local.js",
     "dev": "node local.js",
-    "build": "npx puppeteer browsers install chrome",
+    "build": "echo 'Build complete'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,12 +14,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@sparticuz/chromium": "^149.0.0",
+    "@florydev/linkedin-api-voyager": "^1.5.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.9.4",
-    "puppeteer": "^25.9.0",
-    "puppeteer-core": "^25.9.0"
+    "mongoose": "^9.9.4"
   }
 }

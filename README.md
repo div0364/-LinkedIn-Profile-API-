@@ -1,11 +1,11 @@
 # LinkedIn Profile API Backend
 
-A simple and robust Node.js/Express and MongoDB backend for scraping and caching LinkedIn profiles. The application uses Puppeteer to simulate a browser session using your own LinkedIn cookies to bypass security checks and extract complete profile information.
+A purely reverse-engineered Node.js/Express and MongoDB backend for scraping and caching LinkedIn profiles without using a web browser. The application makes direct HTTP requests to LinkedIn's private "Voyager" API endpoints using your own LinkedIn cookies to retrieve detailed profile data in a structured JSON format.
 
 ## Features
 
+- **No Browser dependency**: Hits LinkedIn endpoints directly using HTTP requests via Axios, eliminating the need for Puppeteer, Playwright, or headless Chromium. Highly resource-efficient and fast (responds in milliseconds).
 - **Profile Scraping**: Extracts name, headline, location, summary, experience, education, skills, languages, certifications, and profile picture.
-- **Dynamic Scroll**: Simulates scrolling to ensure that lazy-loaded sections (like experience, education, and skills) are fully loaded before parsing.
 - **Caching Mechanism**: Stores scraped profile data in MongoDB. If a profile is requested again within 24 hours, it returns the cached data instead of making a new scrape request.
 - **Force Scrape Option**: Allows bypassing the cache using a query parameter to fetch fresh live data.
 
@@ -13,7 +13,7 @@ A simple and robust Node.js/Express and MongoDB backend for scraping and caching
 
 ```
 ├── config/
-│   └── db.js            # MongoDB connection
+│   └── db.js            # MongoDB connection & custom DNS resolution
 ├── controllers/
 │   └── profileController.js  # Business logic for endpoints
 ├── models/
@@ -21,10 +21,12 @@ A simple and robust Node.js/Express and MongoDB backend for scraping and caching
 ├── routes/
 │   └── profileRoutes.js  # API routes definition
 ├── services/
-│   └── scraperService.js # Puppeteer automation logic
+│   └── scraperService.js # Pure reverse-engineered Voyager API scraper
+├── public/
+│   └── index.html       # Single-page Tailwind CSS frontend
 ├── .env.example         # Template for environment variables
 ├── package.json         # Dependencies and scripts
-└── server.js            # Server entry point
+└── local.js             # Local server entry point
 ```
 
 ## Setup Instructions
@@ -188,14 +190,14 @@ Retrieves a cached profile from the database using its vanity username.
 
 ## Approach
 
-1. **Browser Automation (Puppeteer)**: LinkedIn loads its data dynamically using client-side JavaScript. By launching a headless browser and logging in using the session cookies (`li_at` and `JSESSIONID`), the script mimics a real user.
-2. **Lazy Loading Handler**: Many sections of a LinkedIn profile do not render in the HTML source until they are scrolled into view. The scraper scrolls the page to trigger this rendering.
-3. **Caching**: Scraping is a time-consuming and computationally expensive process. To protect the credentials from rate limits and blocks, profile data is cached in MongoDB with an expiration threshold of 24 hours.
+1. **Undocumented Voyager API**: We reverse-engineered LinkedIn's internal HTTP REST API endpoints (`/voyager/api/identity/dash/profiles` and `/voyager/api/identity/profileSectionCollections/`). This allows direct data extraction as normalized JSON without requiring browser overhead or parsing dynamic DOM structures.
+2. **Authentication via Session Hijacking**: The scraper takes the session cookie (`li_at`) and CSRF token (`JSESSIONID`) of a logged-in user, replicating the network layer authorization.
+3. **Database Caching**: To minimize API requests and avoid rate-limiting or account flags, scraped data is cached in MongoDB for 24 hours.
 
 ---
 
 ## Known Limitations
 
-- **Session Expiry**: The `li_at` cookie has an expiration date. If it expires, requests will start failing or redirect to a login wall. The cookies will then need to be updated in `.env`.
-- **Anti-Bot Defenses**: If profiles are scraped at a very high frequency from the same IP address or using the same account, LinkedIn may prompt a verification challenge (CAPTCHA) or restrict the account. It is recommended to run this with adequate delays or rotation.
-- **Layout Adaptability**: If LinkedIn changes its DOM element selectors, some fields (like experience or skills) might return empty and require updating the selectors in the `scraperService.js` file.
+- **Session Expiry**: The `li_at` cookie expires over time, requiring you to copy new credentials into `.env` or the frontend settings.
+- **Account Protection**: Making excessive requests from a single account may trigger a CAPTCHA challenge or lead to session restrictions. Using proxies and caching is recommended.
+- **Endpoint Drift**: Since Voyager is an internal API, LinkedIn can deprecate or restructure endpoints or decoration IDs, which would require updating the requests mapping.
